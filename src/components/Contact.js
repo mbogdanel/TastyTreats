@@ -59,7 +59,7 @@ const Contact = () => {
 
     if (isValid && isHuman) {
       setSuccessMessage('Your message was sent')
-      Axios.post('http://localhost:3001/insert', {
+      Axios.post('https://tastytreatschallenge.herokuapp.com/insert', {
         name: name,
         emailAddress: emailAddress,
         message: message,

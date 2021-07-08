@@ -5,9 +5,11 @@ const Inquiries = () => {
   const [inquiriesList, setInquiriesList] = useState([])
 
   useEffect(() => {
-    Axios.get('http://localhost:3001/read').then((response) => {
-      setInquiriesList(response.data)
-    })
+    Axios.get('https://tastytreatschallenge.herokuapp.com/read').then(
+      (response) => {
+        setInquiriesList(response.data)
+      }
+    )
   }, [])
   const inquiriesListReversed = inquiriesList.reverse()
 
