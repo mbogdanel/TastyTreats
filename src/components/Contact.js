@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Axios from 'axios'
-import Recaptcha from 'react-recaptcha'
+import ReCAPTCHA from 'react-google-recaptcha'
 
 const Contact = () => {
   const [name, setName] = useState('')
@@ -14,20 +14,7 @@ const Contact = () => {
   const [successMessage, setSuccessMessage] = useState('')
   const [isHumanMessageError, setIsHumanMessageError] = useState('')
 
-  //  recaptcha logic
-  let recaptchaInstance
-  const resetRecaptcha = () => {
-    recaptchaInstance.reset()
-  }
-  const recaptchaLoaded = () => {
-    console.log('Recaptcha has loaded')
-  }
-
-  const verifyCallback = (response) => {
-    if (response) {
-      setIsHuman(true)
-    }
-  }
+  const recaptchaRef = React.useRef()
 
   //   form validation
   const validate = () => {
@@ -53,17 +40,23 @@ const Contact = () => {
   }
 
   //   submitting the form
-  const submitInquiry = (e) => {
+  const submitInquiry = async (e) => {
     e.preventDefault()
+    recaptchaRef.current.reset()
     const isValid = validate()
 
-    if (isValid && isHuman) {
+    const token = await recaptchaRef.current.executeAsync()
+    console.log(token)
+
+    if (isValid) {
       setSuccessMessage('Your message was sent')
       Axios.post('https://tastytreatschallenge.herokuapp.com/insert', {
+        // Axios.post('http://localhost:3001/insert', {
         name: name,
         emailAddress: emailAddress,
         message: message,
         subscribed: subscribed,
+        token: token,
       })
       //   clearing the form after validation, returning to initial state
       setName('')
@@ -75,13 +68,11 @@ const Contact = () => {
       setMessageError('')
       setIsHuman(false)
       setIsHumanMessageError('')
-      // reseting reCaptcha and succes message after 5s
-      resetRecaptcha()
+      // reseting success message after 5s
+
       setTimeout(() => {
         setSuccessMessage('')
       }, 5000)
-    } else if (!isHuman) {
-      setIsHumanMessageError('please verify that you are human')
     }
   }
   return (
@@ -125,12 +116,11 @@ const Contact = () => {
           />
           <label className='checkboxBlockElements'>Subscribe </label>
         </div>
-        <Recaptcha
-          ref={(e) => (recaptchaInstance = e)}
-          sitekey='6LdqNoAbAAAAAIXxR9wnRDC8n_VoFSiqUK6-Hu2k'
-          render='explicit'
-          verifyCallback={verifyCallback}
-          onloadCallback={recaptchaLoaded}
+
+        <ReCAPTCHA
+          sitekey={'6LdqNoAbAAAAAIXxR9wnRDC8n_VoFSiqUK6-Hu2k'}
+          size='invisible'
+          ref={recaptchaRef}
         />
 
         {successMessage ? (
